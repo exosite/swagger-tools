@@ -24,7 +24,7 @@
 
 'use strict';
 
-var _ = require('lodash');
+var _ = require('lodash-compat');
 var assert = require('assert');
 var cp = require('child_process');
 var path = require('path');
@@ -105,7 +105,6 @@ module.exports.createServer = function (initArgs, options, callback) {
 
     register(middleware.swaggerValidator(options.swaggerValidatorOptions));
     register(middleware.swaggerRouter(options.swaggerRouterOptions));
-    register(middleware.swaggerUi(options.swaggerUiOptions));
 
     register(handler);
 

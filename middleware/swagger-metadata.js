@@ -24,7 +24,7 @@
 
 'use strict';
 
-var _ = require('lodash');
+var _ = require('lodash-compat');
 var async = require('async');
 var bp = require('body-parser');
 var cHelpers = require('../lib/helpers');
@@ -32,7 +32,7 @@ var debug = require('debug')('swagger-tools:middleware:metadata');
 var mHelpers = require('./helpers');
 var multer = require('multer');
 var parseurl = require('parseurl');
-var pathToRegexp = require('path-to-regexp');
+var { pathToRegexp } = require('path-to-regexp');
 
 // Upstream middlewares
 var bodyParserOptions = {

@@ -30,7 +30,7 @@ process.env.NODE_ENV = 'test';
 // Indicate to swagger-tools that we're in testing mode
 process.env.RUNNING_SWAGGER_TOOLS_TESTS = 'true';
 
-var _ = require('lodash');
+var _ = require('lodash-compat');
 var assert = require('assert');
 var helpers = require('../helpers');
 var request = require('supertest');
