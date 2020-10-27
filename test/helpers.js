@@ -73,9 +73,7 @@ var errorHandler = module.exports.errorHandler = function () {
 module.exports.createServer = function (initArgs, options, callback) {
   var app = require('connect')();
   var serverInit = function (middleware) {
-    var handler = options.handler || function (req, res) {
-      res.end('OK');
-    };
+    var handler = options.handler || function (req, res) { };
 
     function register (middleware) {
       if (_.isUndefined(options.mountPoint)) {
