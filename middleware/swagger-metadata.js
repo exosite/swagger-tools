@@ -24,7 +24,7 @@
 
 'use strict';
 
-var _ = require('lodash-compat');
+var _ = require('lodash');
 var async = require('async');
 var bp = require('body-parser');
 var cHelpers = require('../lib/helpers');
@@ -108,7 +108,7 @@ var expressStylePath = function (basePath, apiPath) {
   }
 
   // Replace Swagger syntax for path parameters with Express' version (All Swagger path parameters are required)
-  return regexEscape((basePath + apiPath).replace(/{/g, ':').replace(/}/g, ''));
+  return (basePath + apiPath).replace(/{/g, ':').replace(/}/g, '');
 };
 
 var processOperationParameters = function (swaggerMetadata, pathKeys, pathMatch, req, res, next) {
@@ -265,7 +265,7 @@ var processSwaggerDocuments = function (rlOrSO, apiDeclarations) {
     var expressPath = expressStylePath(adOrSO.basePath, spec.version === '1.2' ? apiOrPath.path: indexOrName);
     var keys = [];
     var handleSubPaths = !(rlOrSO.paths && rlOrSO.paths[apiPath]['x-swagger-router-handle-subpaths']);
-    var re = pathToRegexp(expressPath, keys, { end: handleSubPaths });
+    var re = pathToRegexp(regexEscape(expressPath), keys, { end: handleSubPaths });
     var cacheKey = re.toString();
     var cacheEntry;
 
@@ -382,13 +382,11 @@ exports = module.exports = function (rlOrSO, apiDeclarations) {
   return function swaggerMetadata (req, res, next) {
     var method = req.method.toLowerCase();
     var path = parseurl(req).pathname;
-    var pathEsc = regexEscape(parseurl(req).pathname);
     var cacheEntry;
     var match;
     var metadata;
 
-    // JAMIE
-    cacheEntry = apiCache[pathEsc] || _.find(apiCache, function (metadata) {
+    cacheEntry = apiCache[path] || _.find(apiCache, function (metadata) {
       match = metadata.re.exec(path);
       return _.isArray(match);
     });

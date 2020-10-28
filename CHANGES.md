@@ -6,6 +6,7 @@
 * major: Removed support for Swagger 1.2
 * major: Removed bundled swagger-ui
 * major: Removed browser support
+* major: Removed the swagger-tools binary
 * major: Updated all dependencies to resolve security issues
 * chore: Support Node.js 14
 
