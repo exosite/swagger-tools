@@ -29,7 +29,8 @@
 var _ = require('lodash');
 var helpers = require('../lib/helpers');
 var validators = require('../lib/validators');
-const querystring = require('querystring');
+var parseurl = require('parseurl');
+var qs = require('qs');
 
 var isModelType = module.exports.isModelType = function (spec, type) {
   return spec.primitives.indexOf(type) === -1;
@@ -128,15 +129,7 @@ module.exports.getParameterValue = function (version, parameter, pathKeys, match
 };
 
 module.exports.parseQueryString = function(req) {
-  if (req.url.indexOf('?') < 0) {
-    return {};
-  }
-  // using `URL` is a little messy because req.url is a path (maybe it's just
-  // the way unit tests are written).  so, need to provide a default URL to
-  // fill in the bits.  it's okay because we only read the query string.
-  const url = new URL(req.url, 'http://localhost');
-  const search = url.search.replace(/^\?/, '');
-  return querystring.parse(search);
+  return req.url.indexOf('?') > -1 ? qs.parse(parseurl(req).query, {}) : {};
 };
 
 module.exports.debugError = function (err, debug) {
