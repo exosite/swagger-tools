@@ -31,7 +31,6 @@ var cHelpers = require('../lib/helpers');
 var debug = require('debug')('swagger-tools:middleware:metadata');
 var mHelpers = require('./helpers');
 var multer = require('multer');
-var parseurl = require('parseurl');
 var { pathToRegexp } = require('path-to-regexp');
 var regexEscape = require('regex-escape');
 
@@ -90,7 +89,11 @@ var makeMultiPartParser = function (parser) {
 
 // Helper functions
 var expressStylePath = function (basePath, apiPath) {
-  basePath = parseurl({url: basePath || '/'}).pathname || '/';
+  // using `URL` is a little messy because basePath is a path (maybe it's just
+  // the way unit tests are written).  so, need to provide a default URL to
+  // fill in the bits.  it's okay because we only read the path.
+  const url = new URL(basePath || '/', 'http://localhost');
+  basePath = url.pathname;
 
   // Make sure the base path starts with '/'
   if (basePath.charAt(0) !== '/') {
@@ -381,7 +384,11 @@ exports = module.exports = function (rlOrSO, apiDeclarations) {
 
   return function swaggerMetadata (req, res, next) {
     var method = req.method.toLowerCase();
-    var path = parseurl(req).pathname;
+    // using `URL` is a little messy because basePath is a path (maybe it's
+    // just the way unit tests are written).  so, need to provide a default
+    // URL to fill in the bits.  it's okay because we only read the path.
+    const url = new URL(req.url, 'http://localhost');
+    const path = url.pathname;
     var cacheEntry;
     var match;
     var metadata;
