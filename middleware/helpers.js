@@ -30,10 +30,6 @@ var _ = require('lodash');
 var helpers = require('../lib/helpers');
 var validators = require('../lib/validators');
 const querystring = require('querystring');
-if (global.URL === undefined) {
-  // node 8.x does not have built-in `URL`
-  global.URL = require('url').URL;
-}
 
 var isModelType = module.exports.isModelType = function (spec, type) {
   return spec.primitives.indexOf(type) === -1;

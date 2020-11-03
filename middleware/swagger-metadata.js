@@ -33,10 +33,6 @@ var mHelpers = require('./helpers');
 var multer = require('multer');
 var { pathToRegexp } = require('path-to-regexp');
 var regexEscape = require('regex-escape');
-if (global.URL === undefined) {
-  // node 8.x does not have built-in `URL`
-  global.URL = require('url').URL;
-}
 
 // Upstream middlewares
 var bodyParserOptions = {
