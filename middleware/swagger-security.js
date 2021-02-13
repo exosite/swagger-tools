@@ -29,19 +29,12 @@ var debug = require('debug')('swagger-tools:middleware:security');
 var helpers = require('./helpers');
 
 var getScopeOrAPIKey = function (req, secDef, secName, secReq) {
-  var swaggerVersion = req.swagger.swaggerVersion;
-  var apiKeyPropName = swaggerVersion === '1.2' ? secDef.keyname : secDef.name;
-  var apiKeyLocation = swaggerVersion === '1.2' ? secDef.passAs : secDef.in;
+  var apiKeyPropName = secDef.name;
+  var apiKeyLocation = secDef.in;
   var scopeOrKey;
 
   if (secDef.type === 'oauth2') {
-    if (swaggerVersion === '1.2') {
-      scopeOrKey = _.map(secReq[secName], function (scope) {
-        return scope.scope;
-      });
-    } else {
-      scopeOrKey = secReq[secName];
-    }
+    scopeOrKey = secReq[secName];
   } else if (secDef.type === 'apiKey') {
     if (apiKeyLocation === 'query') {
       scopeOrKey = (req.query ? req.query : helpers.parseQueryString(req))[apiKeyPropName];
@@ -116,28 +109,14 @@ exports = module.exports = function (options) {
     debug('  Will process: %s', _.isUndefined(operation) ? 'no' : 'yes');
 
     if (operation) {
-      securityReqs = req.swagger.swaggerVersion === '1.2' ?
-        // Global (path level), authorization support is not possible:
-        //   Not possible due to https://github.com/swagger-api/swagger-spec/issues/159
-        _.reduce(req.swagger.operation.authorizations, function (arr, authorization, name) {
-          var obj = {};
-
-          obj[name] = _.map(authorization, function (scope) {
-            return scope.scope;
-          });
-
-          return arr.concat(obj);
-        }, []) :
-      req.swagger.operation.security || req.swagger.swaggerObject.security;
+      securityReqs = req.swagger.operation.security || req.swagger.swaggerObject.security;
 
       if (securityReqs && securityReqs.length > 0) {
         async.mapSeries(securityReqs, function (secReq, cb) { // logical OR - any one can allow
           var secName;
 
           async.map(Object.keys(secReq), function (name, cb) { // logical AND - all must allow
-            var secDef = req.swagger.swaggerVersion === '1.2' ?
-                  req.swagger.resourceListing.authorizations[name] :
-                  req.swagger.swaggerObject.securityDefinitions[name];
+            var secDef = req.swagger.swaggerObject.securityDefinitions[name];
             var handler = handlers[name];
 
             secName = name;

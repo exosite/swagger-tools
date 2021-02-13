@@ -50,8 +50,8 @@ var getParameterType = module.exports.getParameterType = function (schema) {
   return type;
 };
 
-var isModelParameter = module.exports.isModelParameter = function (version, param) {
-  var spec = helpers.getSpec(version);
+var isModelParameter = module.exports.isModelParameter = function (param) {
+  var spec = helpers.getSpec();
   var type = getParameterType(param);
   var isModel = false;
 
@@ -66,9 +66,9 @@ var isModelParameter = module.exports.isModelParameter = function (version, para
   return isModel;
 };
 
-module.exports.getParameterValue = function (version, parameter, pathKeys, match, req, debug) {
-  var defaultVal = version === '1.2' ? parameter.defaultValue : parameter.default;
-  var paramLocation = version === '1.2' ? parameter.paramType : parameter.in;
+module.exports.getParameterValue = function (parameter, pathKeys, match, req, debug) {
+  var defaultVal = parameter.default;
+  var paramLocation = parameter.in;
   var paramType = getParameterType(parameter);
   var val;
 
@@ -93,7 +93,7 @@ module.exports.getParameterValue = function (version, parameter, pathKeys, match
       if (_.isArray(val)) {
         val = val[0];
       }
-    } else if (isModelParameter(version, parameter)) {
+    } else if (isModelParameter(parameter)) {
       val = req.body;
     } else {
       val = req.body[parameter.name];

@@ -24,14 +24,11 @@
 
 'use strict';
 
-var _ = require('lodash');
-var debug = require('debug')('swagger-tools:middleware');
-var helpers = require('./lib/helpers');
+const _ = require('lodash');
+const debug = require('debug')('swagger-tools:middleware');
+const { printValidationResults, getSpec } = require('./lib/helpers');
 
-var initializeMiddleware = function initializeMiddleware (rlOrSO, resources, callback) {
-  var args;
-  var spec;
-
+function initializeMiddleware (rlOrSO, resources, callback) {
   debug('Initializing middleware');
 
   if (_.isUndefined(rlOrSO)) {
@@ -40,24 +37,12 @@ var initializeMiddleware = function initializeMiddleware (rlOrSO, resources, cal
     throw new TypeError('rlOrSO must be an object');
   }
 
-  args = [rlOrSO];
-  spec = helpers.getSpec(helpers.getSwaggerVersion(rlOrSO), true);
+  const args = [rlOrSO];
+  const spec = getSpec();
 
   debug('  Identified Swagger version: %s', spec.version);
-
-  if (spec.version === '1.2') {
-    if (_.isUndefined(resources)) {
-      throw new Error('resources is required');
-    } else if (!_.isArray(resources)) {
-      throw new TypeError('resources must be an array');
-    }
-
-    debug('  Number of API Declarations: %d', resources.length);
-
-    args.push(resources);
-  } else {
-    callback = arguments[1];
-  }
+  
+  callback = arguments[1];
 
   if (_.isUndefined(callback)) {
     throw new Error('callback is required');
@@ -65,12 +50,11 @@ var initializeMiddleware = function initializeMiddleware (rlOrSO, resources, cal
     throw new TypeError('callback must be a function');
   }
 
-  args.push(function (err, results) {
-    if (results && results.errors.length + _.reduce(results.apiDeclarations || [], function (count, apiDeclaration) {
+  args.push((err, results) => {
+    if (results && results.errors.length + _.reduce(results.apiDeclarations || [], (count, apiDeclaration) => {
       return count += (apiDeclaration ? apiDeclaration.errors.length : 0);
     }, 0) > 0) {
       err = new Error('Swagger document(s) failed validation so the server cannot start');
-
       err.failedValidation = true;
       err.results = results;
     }
@@ -84,8 +68,8 @@ var initializeMiddleware = function initializeMiddleware (rlOrSO, resources, cal
 
       callback({
         // Create a wrapper to avoid having to pass the non-optional arguments back to the swaggerMetadata middleware
-        swaggerMetadata: function () {
-          var swaggerMetadata = require('./middleware/swagger-metadata');
+        swaggerMetadata: () => {
+          const swaggerMetadata = require('./middleware/swagger-metadata');
           return swaggerMetadata.apply(undefined, args.slice(0, args.length - 1));
         },
         swaggerRouter: require('./middleware/swagger-router'),
@@ -100,7 +84,7 @@ var initializeMiddleware = function initializeMiddleware (rlOrSO, resources, cal
         callback(err);
       } else {
         if (err.failedValidation === true) {
-          helpers.printValidationResults(spec.version, rlOrSO, resources, results, true);
+          printValidationResults(spec.version, rlOrSO, resources, results, true);
         } else {
           console.error('Error initializing middleware');
           console.error(err.stack);
@@ -115,6 +99,6 @@ var initializeMiddleware = function initializeMiddleware (rlOrSO, resources, cal
 };
 
 module.exports = {
-  initializeMiddleware: initializeMiddleware,
+  initializeMiddleware,
   specs: require('./lib/specs')
 };

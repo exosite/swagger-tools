@@ -1,6 +1,9 @@
 ## Release Notes
 # Changes
 
+## 0.12.0
+* major: Completely remove Swagger 1.2 support
+
 ## 0.11.0
 * major: changed module name to @axway/swagger-tools
 * major: Removed support for Swagger 1.2

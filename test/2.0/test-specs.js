@@ -1273,7 +1273,8 @@ describe('Specification v2.0', function () {
         });
 
         // This test was failing because it z-schema cannot resolve the URL;
-        // it is also something we don't want to support.
+        // it is also something we don't want to support.        
+        // Update 13.02.2021: We might want to support this in the future
         it.skip('path level (remote)', function (done) {
           var swaggerObject = _.cloneDeep(petStoreJson);
           var cPath = _.cloneDeep(swaggerObject.paths['/pets/{id}']);

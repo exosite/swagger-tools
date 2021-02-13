@@ -38,22 +38,13 @@ var defaultOptions = {
 var getHandlerName = function (req) {
   var handlerName;
 
-  switch (req.swagger.swaggerVersion) {
-  case '1.2':
-    handlerName = req.swagger.operation.nickname;
-    break;
-
-  case '2.0':
-    if (req.swagger.operation['x-swagger-router-controller'] || req.swagger.path['x-swagger-router-controller']) {
-      handlerName = (req.swagger.operation['x-swagger-router-controller'] ?
-        req.swagger.operation['x-swagger-router-controller'] :
-        req.swagger.path['x-swagger-router-controller']) + '_' +
-        (req.swagger.operation.operationId ? req.swagger.operation.operationId : req.method.toLowerCase());
-    } else {
-      handlerName = req.swagger.operation.operationId;
-    }
-
-    break;
+  if (req.swagger.operation['x-swagger-router-controller'] || req.swagger.path['x-swagger-router-controller']) {
+    handlerName = (req.swagger.operation['x-swagger-router-controller'] ?
+      req.swagger.operation['x-swagger-router-controller'] :
+      req.swagger.path['x-swagger-router-controller']) + '_' +
+      (req.swagger.operation.operationId ? req.swagger.operation.operationId : req.method.toLowerCase());
+  } else {
+    handlerName = req.swagger.operation.operationId;
   }
 
   return handlerName;
@@ -105,7 +96,7 @@ var handlerCacheFromDir = function (dirOrDirs) {
 
   return handlerCache;
 };
-var getMockValue = function (version, schema) {
+var getMockValue = function (schema) {
   var type = _.isPlainObject(schema) ? schema.type : schema;
   var value;
 
@@ -115,14 +106,12 @@ var getMockValue = function (version, schema) {
 
   switch (type) {
   case 'array':
-    value = [getMockValue(version, _.isArray(schema.items) ? schema.items[0] : schema.items)];
+    value = [getMockValue(_.isArray(schema.items) ? schema.items[0] : schema.items)];
 
     break;
 
   case 'boolean':
-    if (version === '1.2' && !_.isUndefined(schema.defaultValue)) {
-      value = schema.defaultValue;
-    } else if (version === '2.0' && !_.isUndefined(schema.default)) {
+    if (!_.isUndefined(schema.default)) {
       value = schema.default;
     } else if (_.isArray(schema.enum)) {
       value = schema.enum[0];
@@ -142,9 +131,7 @@ var getMockValue = function (version, schema) {
     break;
 
   case 'integer':
-    if (version === '1.2' && !_.isUndefined(schema.defaultValue)) {
-      value = schema.defaultValue;
-    } else if (version === '2.0' && !_.isUndefined(schema.default)) {
+    if (!_.isUndefined(schema.default)) {
       value = schema.default;
     } else if (_.isArray(schema.enum)) {
       value = schema.enum[0];
@@ -166,20 +153,18 @@ var getMockValue = function (version, schema) {
 
     _.each(schema.allOf, function (parentSchema) {
       _.each(parentSchema.properties, function (property, propName) {
-        value[propName] = getMockValue(version, property);
+        value[propName] = getMockValue(property);
       });
     });
 
     _.each(schema.properties, function (property, propName) {
-      value[propName] = getMockValue(version, property);
+      value[propName] = getMockValue(property);
     });
 
     break;
 
   case 'number':
-    if (version === '1.2' && !_.isUndefined(schema.defaultValue)) {
-      value = schema.defaultValue;
-    } else if (version === '2.0' && !_.isUndefined(schema.default)) {
+    if (!_.isUndefined(schema.default)) {
       value = schema.default;
     } else if (_.isArray(schema.enum)) {
       value = schema.enum[0];
@@ -197,9 +182,7 @@ var getMockValue = function (version, schema) {
     break;
 
   case 'string':
-    if (version === '1.2' && !_.isUndefined(schema.defaultValue)) {
-      value = schema.defaultValue;
-    } else if (version === '2.0' && !_.isUndefined(schema.default)) {
+    if (!_.isUndefined(schema.default)) {
       value = schema.default;
     } else if (_.isArray(schema.enum)) {
       value = schema.enum[0];
@@ -239,57 +222,33 @@ var mockResponse = function (req, res, next, handlerName) {
       return res.end(response);
     }
   };
-  var spec = cHelpers.getSpec(req.swagger.swaggerVersion);
+  var spec = cHelpers.getSpec();
   var stubResponse = 'Stubbed response for ' + handlerName;
   var apiDOrSO;
   var responseType;
 
-  switch (req.swagger.swaggerVersion) {
-  case '1.2':
-    apiDOrSO = req.swagger.apiDeclaration;
-    responseType = operation.type;
+  apiDOrSO = req.swagger.swaggerObject;
 
-    break;
+  if (method === 'post' && operation.responses['201']) {
+    responseType = operation.responses['201'];
 
-  case '2.0':
-    apiDOrSO = req.swagger.swaggerObject;
+    res.statusCode = 201;
+  } else if (method === 'delete' && operation.responses['204']) {
+    responseType = operation.responses['204'];
 
-    if (method === 'post' && operation.responses['201']) {
-      responseType = operation.responses['201'];
-
-      res.statusCode = 201;
-    } else if (method === 'delete' && operation.responses['204']) {
-      responseType = operation.responses['204'];
-
-      res.statusCode = 204;
-    } else if (operation.responses['200']) {
-      responseType = operation.responses['200'];
-    } else if (operation.responses['default']) {
-      responseType = operation.responses['default'];
-    } else {
-      responseType = 'void';
-    }
-
-    break;
+    res.statusCode = 204;
+  } else if (operation.responses['200']) {
+    responseType = operation.responses['200'];
+  } else if (operation.responses['default']) {
+    responseType = operation.responses['default'];
+  } else {
+    responseType = 'void';
   }
 
   if (_.isPlainObject(responseType) || mHelpers.isModelType(spec, responseType)) {
-    if (req.swagger.swaggerVersion === '1.2') {
-      spec.composeModel(apiDOrSO, responseType, function (err, result) {
-        if (err) {
-          return sendResponse(undefined, err);
-        } else {
-          // Should we handle this differently as undefined typically means the model doesn't exist
-          return sendResponse(undefined, _.isUndefined(result) ?
-                                           stubResponse :
-                                           JSON.stringify(getMockValue(req.swagger.swaggerVersion, result)));
-        }
-      });
-    } else {
-      return sendResponse(undefined, JSON.stringify(getMockValue(req.swagger.swaggerVersion, responseType.schema || responseType)));
-    }
+    return sendResponse(undefined, JSON.stringify(getMockValue(responseType.schema || responseType)));
   } else {
-    return sendResponse(undefined, getMockValue(req.swagger.swaggerVersion, responseType));
+    return sendResponse(undefined, getMockValue(responseType));
   }
 };
 var createStubHandler = function (req, res, next, handlerName) {
@@ -307,7 +266,7 @@ var send405 = function (req, res, next) {
   var err = new Error('Route defined in Swagger specification (' +
                         (_.isUndefined(req.swagger.api) ? req.swagger.apiPath : req.swagger.api.path) +
                         ') but there is no defined ' +
-                      (req.swagger.swaggerVersion === '1.2' ? req.method.toUpperCase() : req.method.toLowerCase()) + ' operation.');
+                      req.method.toLowerCase() + ' operation.');
 
   if (!_.isUndefined(req.swagger.api)) {
     _.each(req.swagger.api.operations, function (operation) {

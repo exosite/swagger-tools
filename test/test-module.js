@@ -40,16 +40,6 @@ var petStoreJson = _.cloneDeep(require('../samples/2.0/petstore.json'));
 
 describe('swagger-tools', function () {
   describe('initializeMiddlware', function () {
-    it('should throw errors for invalid arguments (invalid Resource Listing or Swagger Object)', function () {
-      try {
-        swagger.initializeMiddleware({}, function() {
-          assert.fail(null, null, 'Should had failed');
-        });
-      } catch (err) {
-        assert.equal('Unsupported Swagger version: undefined', err.message);
-      }
-    });
-
     describe('Swagger 2.0', function () {
       it('should throw errors for invalid arguments', function () {
         var errors = {
