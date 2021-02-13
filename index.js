@@ -84,7 +84,7 @@ function initializeMiddleware (rlOrSO, resources, callback) {
         callback(err);
       } else {
         if (err.failedValidation === true) {
-          printValidationResults(spec.version, rlOrSO, resources, results, true);
+          printValidationResults(rlOrSO, resources, results, true);
         } else {
           console.error('Error initializing middleware');
           console.error(err.stack);

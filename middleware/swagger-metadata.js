@@ -24,47 +24,45 @@
 
 'use strict';
 
-var _ = require('lodash');
-var async = require('async');
-var bp = require('body-parser');
-var cHelpers = require('../lib/helpers');
-var debug = require('debug')('swagger-tools:middleware:metadata');
-var mHelpers = require('./helpers');
-var multer = require('multer');
-var parseurl = require('parseurl');
-var { pathToRegexp } = require('path-to-regexp');
-var regexEscape = require('regex-escape');
+const _ = require('lodash');
+const async = require('async');
+const bp = require('body-parser');
+const cHelpers = require('../lib/helpers');
+const debug = require('debug')('swagger-tools:middleware:metadata');
+const mHelpers = require('./helpers');
+const multer = require('multer');
+const parseurl = require('parseurl');
+const { pathToRegexp } = require('path-to-regexp');
+const regexEscape = require('regex-escape');
 
 // Upstream middlewares
-var bodyParserOptions = {
-  extended: false
-};
-var multerOptions = {
-  storage: multer.memoryStorage()
-};
-var textBodyParserOptions = {
-  type: '*/*'
-};
-
-var jsonBodyParser = bp.json();
-var parseQueryString = mHelpers.parseQueryString;
-var queryParser = function (req, res, next) {
+const parseQueryString = mHelpers.parseQueryString;
+function queryParser(req, res, next) {
   if (_.isUndefined(req.query)) {
     req.query = parseQueryString(req);
   }
 
   return next();
 };
-var realTextBodyParser = bp.text(textBodyParserOptions);
-var textBodyParser = function (req, res, next) {
+
+const textBodyParserOptions = {
+  type: '*/*'
+};
+const realTextBodyParser = bp.text(textBodyParserOptions);
+function textBodyParser(req, res, next) {
   if (_.isUndefined(req.body)) {
     realTextBodyParser(req, res, next);
   } else {
     next();
   }
 };
-var urlEncodedBodyParser = bp.urlencoded(bodyParserOptions);
-var bodyParser = function (req, res, next) {
+
+const bodyParserOptions = {
+  extended: false
+};
+const jsonBodyParser = bp.json();
+const urlEncodedBodyParser = bp.urlencoded(bodyParserOptions);
+function bodyParser(req, res, next) {
   if (_.isUndefined(req.body)) {
     urlEncodedBodyParser(req, res, function (err) {
       if (err) {
@@ -77,8 +75,12 @@ var bodyParser = function (req, res, next) {
     next();
   }
 };
-var realMultiPartParser = multer(multerOptions);
-var makeMultiPartParser = function (parser) {
+
+const multerOptions = {
+  storage: multer.memoryStorage()
+};
+const realMultiPartParser = multer(multerOptions);
+function makeMultiPartParser(parser) {
   return function (req, res, next) {
     if (_.isUndefined(req.files)) {
       parser(req, res, next);
@@ -89,7 +91,7 @@ var makeMultiPartParser = function (parser) {
 };
 
 // Helper functions
-var expressStylePath = function (basePath, apiPath) {
+function expressStylePath(basePath, apiPath) {
   basePath = parseurl({url: basePath || '/'}).pathname || '/';
 
   // Make sure the base path starts with '/'
@@ -111,7 +113,7 @@ var expressStylePath = function (basePath, apiPath) {
   return (basePath + apiPath).replace(/{/g, ':').replace(/}/g, '');
 };
 
-var processOperationParameters = function (swaggerMetadata, pathKeys, pathMatch, req, res, next) {
+function processOperationParameters(swaggerMetadata, pathKeys, pathMatch, req, res, next) {
   var spec = cHelpers.getSpec();
   var parameters = !_.isUndefined(swaggerMetadata) ?
                      (swaggerMetadata.operationParameters) :
@@ -221,7 +223,7 @@ var processOperationParameters = function (swaggerMetadata, pathKeys, pathMatch,
     return next();
   });
 };
-var processSwaggerDocuments = function (rlOrSO, apiDeclarations) {
+function processSwaggerDocuments(rlOrSO, apiDeclarations) {
   if (_.isUndefined(rlOrSO)) {
     throw new Error('rlOrSO is required');
   } else if (!_.isPlainObject(rlOrSO)) {
@@ -327,7 +329,7 @@ var processSwaggerDocuments = function (rlOrSO, apiDeclarations) {
  *
  * @returns the middleware function
  */
-exports = module.exports = function (rlOrSO, apiDeclarations) {
+module.exports = (rlOrSO, apiDeclarations) => {
   debug('Initializing swagger-metadata middleware');
 
   var apiCache = processSwaggerDocuments(rlOrSO, apiDeclarations);

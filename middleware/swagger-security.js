@@ -23,12 +23,12 @@
  */
 'use strict';
 
-var _ = require('lodash');
-var async = require('async');
-var debug = require('debug')('swagger-tools:middleware:security');
-var helpers = require('./helpers');
+const _ = require('lodash');
+const async = require('async');
+const debug = require('debug')('swagger-tools:middleware:security');
+const helpers = require('./helpers');
 
-var getScopeOrAPIKey = function (req, secDef, secName, secReq) {
+function getScopeOrAPIKey(req, secDef, secName, secReq) {
   var apiKeyPropName = secDef.name;
   var apiKeyLocation = secDef.in;
   var scopeOrKey;
@@ -45,7 +45,8 @@ var getScopeOrAPIKey = function (req, secDef, secName, secReq) {
 
   return scopeOrKey;
 };
-var sendSecurityError = function (err, res, next) {
+
+function sendSecurityError(err, res, next) {
   // Populate default values if not present
   if (!err.code) {
     err.code = 'server_error';
@@ -91,7 +92,7 @@ var sendSecurityError = function (err, res, next) {
  *
  * @returns the middleware function
  */
-exports = module.exports = function (options) {
+module.exports = options => {
   var handlers = options || {};
 
   debug('Initializing swagger-security middleware');

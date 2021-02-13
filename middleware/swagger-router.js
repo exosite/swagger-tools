@@ -24,18 +24,19 @@
 
 'use strict';
 
-var _ = require('lodash');
-var cHelpers = require('../lib/helpers');
-var debug = require('debug')('swagger-tools:middleware:router');
-var fs = require('fs');
-var mHelpers = require('./helpers');
-var path = require('path');
+const _ = require('lodash');
+const cHelpers = require('../lib/helpers');
+const debug = require('debug')('swagger-tools:middleware:router');
+const fs = require('fs');
+const mHelpers = require('./helpers');
+const path = require('path');
 
-var defaultOptions = {
+const defaultOptions = {
   controllers: {},
   useStubs: false // Should we set this automatically based on process.env.NODE_ENV?
 };
-var getHandlerName = function (req) {
+
+function getHandlerName(req) {
   var handlerName;
 
   if (req.swagger.operation['x-swagger-router-controller'] || req.swagger.path['x-swagger-router-controller']) {
@@ -50,7 +51,7 @@ var getHandlerName = function (req) {
   return handlerName;
 };
 
-var handlerCacheFromDir = function (dirOrDirs) {
+function handlerCacheFromDir(dirOrDirs) {
   var handlerCache = {};
   var jsFileRegex = /\.(coffee|js|ts)$/;
   var dirs = [];
@@ -96,7 +97,8 @@ var handlerCacheFromDir = function (dirOrDirs) {
 
   return handlerCache;
 };
-var getMockValue = function (schema) {
+
+function getMockValue(schema) {
   var type = _.isPlainObject(schema) ? schema.type : schema;
   var value;
 
@@ -201,7 +203,8 @@ var getMockValue = function (schema) {
 
   return value;
 };
-var mockResponse = function (req, res, next, handlerName) {
+
+function mockResponse(req, res, next, handlerName) {
   var method = req.method.toLowerCase();
   var operation = req.swagger.operation;
   var sendResponse = function (err, response) {
@@ -251,7 +254,8 @@ var mockResponse = function (req, res, next, handlerName) {
     return sendResponse(undefined, getMockValue(responseType));
   }
 };
-var createStubHandler = function (req, res, next, handlerName) {
+
+function createStubHandler(req, res, next, handlerName) {
   // TODO: Handle headers for 2.0
   // TODO: Handle examples (per mime-type) for 2.0
   // TODO: Handle non-JSON response types
@@ -261,7 +265,7 @@ var createStubHandler = function (req, res, next, handlerName) {
   };
 };
 
-var send405 = function (req, res, next) {
+function send405(req, res, next) {
   var allowedMethods = [];
   var err = new Error('Route defined in Swagger specification (' +
                         (_.isUndefined(req.swagger.api) ? req.swagger.apiPath : req.swagger.api.path) +
@@ -309,7 +313,7 @@ var send405 = function (req, res, next) {
  *
  * @returns the middleware function
  */
-exports = module.exports = function (options) {
+module.exports = options => {
   var handlerCache = {};
 
   debug('Initializing swagger-router middleware');

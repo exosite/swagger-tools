@@ -159,7 +159,7 @@ describe('swagger-tools', function () {
 
   describe('specs', function () {
     it('should have proper exports', function () {
-      assert.equal(0, _.difference(['v2', 'v2_0'], Object.keys(swagger.specs)).length);
+      assert.equal(0, _.difference(['spec'], Object.keys(swagger.specs)).length);
     });
   });
 });

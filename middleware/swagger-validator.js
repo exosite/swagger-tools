@@ -24,14 +24,14 @@
 
 'use strict';
 
-var _ = require('lodash');
-var async = require('async');
-var cHelpers = require('../lib/helpers');
-var debug = require('debug')('swagger-tools:middleware:validator');
-var mHelpers = require('./helpers');
-var validators = require('../lib/validators');
+const _ = require('lodash');
+const async = require('async');
+const cHelpers = require('../lib/helpers');
+const debug = require('debug')('swagger-tools:middleware:validator');
+const mHelpers = require('./helpers');
+const validators = require('../lib/validators');
 
-var sendData = function (res, data, encoding, skipped) {
+function sendData(res, data, encoding, skipped) {
   // 'res.end' requires a Buffer or String so if it's not one, create a String
   if (!(data instanceof Buffer) && !_.isString(data)) {
     data = JSON.stringify(data);
@@ -51,7 +51,7 @@ var sendData = function (res, data, encoding, skipped) {
   res.end(data, encoding);
 };
 
-var send400 = function (req, res, next, err) {
+function send400(req, res, next, err) {
   var currentMessage;
   var validationMessage;
 
@@ -105,7 +105,8 @@ var send400 = function (req, res, next, err) {
 
   return next(err);
 };
-var validateValue = function (req, schema, path, val, location, callback) {
+
+function validateValue(req, schema, path, val, location, callback) {
   var document = req.swagger.apiDeclaration || req.swagger.swaggerObject;
   var isModel = mHelpers.isModelParameter(schema);
   var spec = cHelpers.getSpec();
@@ -160,7 +161,8 @@ var validateValue = function (req, schema, path, val, location, callback) {
     callback();
   }
 };
-var wrapEnd = function (req, res, next) {
+
+function wrapEnd(req, res, next) {
   var operation = req.swagger.operation;
   var originalEnd = res.end;
   var vPath = _.cloneDeep(req.swagger.operationPath);
@@ -290,7 +292,7 @@ var wrapEnd = function (req, res, next) {
  *
  * @returns the middleware function
  */
-exports = module.exports = function (options) {
+module.exports = options => {
   debug('Initializing swagger-validator middleware');
 
   if (_.isUndefined(options)) {

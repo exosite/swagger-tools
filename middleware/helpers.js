@@ -26,17 +26,27 @@
 
 /* This module contains code that is reused in more than one of the Swagger middlewares */
 
-var _ = require('lodash');
-var helpers = require('../lib/helpers');
-var validators = require('../lib/validators');
-var parseurl = require('parseurl');
-var qs = require('qs');
+const _ = require('lodash');
+const helpers = require('../lib/helpers');
+const validators = require('../lib/validators');
+const parseurl = require('parseurl');
+const qs = require('qs');
 
-var isModelType = module.exports.isModelType = function (spec, type) {
+module.exports = {
+  isModelType,
+  getParameterType,
+  isModelParameter,
+  getParameterValue,
+  parseQueryString,
+  debugError,
+  convertValue
+}
+
+function isModelType(spec, type) {
   return spec.primitives.indexOf(type) === -1;
 };
 
-var getParameterType = module.exports.getParameterType = function (schema) {
+function getParameterType(schema) {
   var type = schema.type;
 
   if (!type && schema.schema) {
@@ -50,7 +60,7 @@ var getParameterType = module.exports.getParameterType = function (schema) {
   return type;
 };
 
-var isModelParameter = module.exports.isModelParameter = function (param) {
+function isModelParameter(param) {
   var spec = helpers.getSpec();
   var type = getParameterType(param);
   var isModel = false;
@@ -66,7 +76,7 @@ var isModelParameter = module.exports.isModelParameter = function (param) {
   return isModel;
 };
 
-module.exports.getParameterValue = function (parameter, pathKeys, match, req, debug) {
+function getParameterValue(parameter, pathKeys, match, req, debug) {
   var defaultVal = parameter.default;
   var paramLocation = parameter.in;
   var paramType = getParameterType(parameter);
@@ -128,11 +138,11 @@ module.exports.getParameterValue = function (parameter, pathKeys, match, req, de
   return val;
 };
 
-module.exports.parseQueryString = function(req) {
+function parseQueryString(req) {
   return req.url.indexOf('?') > -1 ? qs.parse(parseurl(req).query, {}) : {};
 };
 
-module.exports.debugError = function (err, debug) {
+function debugError(err, debug) {
   var reason = err.message.replace(/^.*validation failed: /, '');
 
   reason = reason.charAt(0).toUpperCase() + reason.substring(1);
@@ -164,7 +174,7 @@ module.exports.debugError = function (err, debug) {
   }
 };
 
-var convertValue = module.exports.convertValue = function (value, schema, type, location) {
+function convertValue(value, schema, type, location) {
   var original = value;
 
   // Default to {}
