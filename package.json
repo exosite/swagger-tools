@@ -34,7 +34,8 @@
     "async": "^3.2.0",
     "connect": "^3.7.0",
     "mocha": "^6.2.3",
-    "supertest": "^5.0.0"
+    "supertest": "^5.0.0",
+    "dependency-check": "^4.1.0"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
@@ -52,6 +53,7 @@
   },
   "scripts": {
     "test": "mocha --recursive",
-    "test:watch": "mocha --recursive --watch"
+    "test:watch": "mocha --recursive --watch",
+    "check-deps": "dependency-check ./package.json --verbose"
   }
 }
