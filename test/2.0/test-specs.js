@@ -32,6 +32,7 @@ var async = require('async');
 var JsonRefs = require('json-refs');
 var spec = require('../../lib/specs').v2_0 // jshint ignore:line
 var petStoreJson = _.cloneDeep(require('../../samples/2.0/petstore.json'));
+var jsonWithEncodedRefs = _.cloneDeep(require('../../samples/2.0/jsonWithEncodedRefs.json'));
 
 describe('Specification v2.0', function () {
   var server;
@@ -99,6 +100,19 @@ describe('Specification v2.0', function () {
         done();
       });
     });
+
+    it('should return undefined for JSON files with URI encoded refs', function (done) {
+      spec.validate(jsonWithEncodedRefs, function (err, result) {
+        if (err) {
+          return done(err);
+        }
+
+        assert.ok(_.isUndefined(err));
+        assert.ok(_.isUndefined(result));
+
+        done();
+      });
+    });    
 
     describe('should return errors for structurally invalid JSON files', function () {
       it('extra property', function (done) {

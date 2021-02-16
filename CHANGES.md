@@ -4,6 +4,7 @@
 ## 0.12.0
 * major: Completely remove Swagger 1.2 support
 * major: Remove working within the browser
+* Fix "UNRESOLVABLE definition error" when definitions contain URI encoded charactes
 
 ## 0.11.0
 * major: changed module name to @axway/swagger-tools
