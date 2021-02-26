@@ -1,0 +1,154 @@
+{
+	"swagger": "2.0",
+	"info": {
+		"description": "Greeting",
+		"version": "1.0.0",
+		"title": "Greeting API"
+	},
+	"paths": {
+		"/greet": {
+			"get": {
+                "security": [
+                    {
+                        "oauth%2F": ["read"]
+                    }
+                ],
+				"description": "",
+				"operationId": "Greet",
+				"parameters": [
+					{
+						"description": "The username",
+						"in": "query",
+						"name": "username",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"produces": [
+					"application/json"
+				],
+				"responses": {
+					"201": {
+						"description": "schemaWithNestedRefs",
+						"schema": {
+							"$ref": "#/definitions/ProductWithRef"
+						}
+					},
+					"202": {
+						"description": "definitionWithTilde",
+						"schema": {
+							"$ref": "#/definitions/Pro~0duct"
+						}                        
+					},
+					"203": {
+						"description": "definitionWithHash",
+						"schema": {
+							"$ref": "#/definitions/Pro~1duct"
+						}                  
+					},
+					"204": {
+						"description": "trickyOne",
+						"schema": {
+							"$ref": "#/definitions/Pro%3A%23du~0~1ct%21"
+						}                  
+                    }
+				},
+				"summary": "Greet a user",
+				"tags": [
+					"helloworld"
+				]
+			}
+		}
+	},
+    "definitions": {
+        "ProductWithRef": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/Apple"
+                },
+                {
+                    "$ref": "#/definitions/Banana"
+                }                
+            ]
+        },
+        "Apple": {
+            "type": "object",
+            "properties": {
+                "brand": {
+                    "type": "string",
+                    "description": "Apple brand"
+                },
+                "origin": {
+                    "type": "string",
+                    "description": "Country of origin"
+                }                
+            }
+        },
+        "Banana": {
+            "type": "object",
+            "properties": {
+                "brand": {
+                    "type": "string",
+                    "description": "Apple brand"
+                },
+                "origin": {
+                    "type": "string",
+                    "description": "Country of origin"
+                }                
+            }
+        },
+        "Pro/duct": {
+            "type": "object"
+        },
+        "Pro~duct": {
+            "type": "object"
+        },
+        "Pro:#du~/ct!": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/Ap~1ple%3F"
+                },
+                {
+                    "$ref": "#/definitions/Bana~1na~0"
+                }                
+            ]
+        },
+        "Ap/ple?": {
+            "type": "object",
+            "properties": {
+                "brand": {
+                    "type": "string",
+                    "description": "Apple brand"
+                },
+                "origin": {
+                    "type": "string",
+                    "description": "Country of origin"
+                }                
+            }
+        },
+        "Bana/na~": {
+            "type": "object",
+            "properties": {
+                "brand": {
+                    "type": "string",
+                    "description": "Apple brand"
+                },
+                "origin": {
+                    "type": "string",
+                    "description": "Country of origin"
+                }                
+            }
+        }
+    },
+    "securityDefinitions": {
+        "oauth%2F": {
+          "type": "oauth2",
+          "scopes": {
+            "read": "Read access."
+          },
+          "flow": "accessCode",
+          "authorizationUrl": "http://petstore.swagger.wordnik.com/oauth/authorize",
+          "tokenUrl": "http://petstore.swagger.wordnik.com/oauth/token"
+        }
+      }
+}
