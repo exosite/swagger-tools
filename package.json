@@ -51,6 +51,7 @@
     "z-schema": "^5.0.0"
   },
   "scripts": {
+    "build": "npm test",
     "test": "mocha --recursive",
     "test:watch": "mocha --recursive --watch"
   }
