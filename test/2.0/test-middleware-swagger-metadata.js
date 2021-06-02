@@ -730,7 +730,9 @@ describe('Swagger Metadata Middleware v2.0', function () {
         number: '1.1',
         string: 'swagger-tools',
         'string-date': '2014-06-16',
-        'string-date-time': '2014-06-16T18:20:35-06:00'
+        'string-date-time': '2014-06-16T18:20:35-06:00',
+        'string-pattern-date': '2014-06-16',
+        'string-pattern-date-time': '2014-06-16T18:20:35-06:00'
       };
       var paramValues = {
         boolean: true,
@@ -738,7 +740,9 @@ describe('Swagger Metadata Middleware v2.0', function () {
         number: 1.1,
         string: 'swagger-tools',
         'string-date': new Date('2014-06-16'),
-        'string-date-time': new Date('2014-06-16T18:20:35-06:00')
+        'string-date-time': new Date('2014-06-16T18:20:35-06:00'),
+        'string-pattern-date': new Date('2014-06-16'),
+        'string-pattern-date-time': new Date('2014-06-16T18:20:35-06:00'),
       };
 
       async.map(Object.keys(queryValues), function (type, callback) {
@@ -747,13 +751,18 @@ describe('Swagger Metadata Middleware v2.0', function () {
         var swaggerObject = _.cloneDeep(petStoreJson);
         var paramDef = {
             in: 'query',
-          name: argName
+            name: argName
         };
         var query = {};
         var typeParts = type.split('-');
 
         if (typeParts.length === 1) {
           paramDef.type = type;
+        } else if (type === 'string-pattern-date' || type === 'string-pattern-date-time') {
+          paramDef.type = typeParts[0];
+          paramDef.format = typeParts.slice(2).join('-');
+          // works with both date and date-time, just need a pattern
+          paramDef.pattern = '([12]\\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01]))';
         } else {
           paramDef.type = typeParts[0];
           paramDef.format = typeParts.slice(1).join('-');

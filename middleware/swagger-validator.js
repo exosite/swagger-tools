@@ -107,13 +107,20 @@ var send400 = function (req, res, next, err) {
 
   return next(err);
 };
-var validateValue = function (req, schema, path, val, location, callback) {
+
+var validateValue = function (req, schema, path, val, originalVal, location, callback) {
   var document = req.swagger.apiDeclaration || req.swagger.swaggerObject;
   var version = req.swagger.apiDeclaration ? '1.2' : '2.0';
   var isModel = mHelpers.isModelParameter(version, schema);
   var spec = cHelpers.getSpec(version);
 
-  val = mHelpers.convertValue(val, schema, mHelpers.getParameterType(schema), location);
+  if (schema.type === 'string'
+    && (schema.format === 'date' || schema.format === 'date-time')) {
+    // When the format is 'date', the value is automatically converted to a
+    // `Date` object. If the JSON schema has a pattern, it will fail validation.
+    // In this case, schema validation needs to run against the original value.
+    val = originalVal;
+  }
 
   try {
     validators.validateSchemaConstraints(version, schema, path, val);
@@ -281,7 +288,8 @@ var wrapEnd = function (req, res, next) {
       if (_.isUndefined(schema)) {
         sendData(swaggerVersion, res, val, encoding, true);
       } else {
-        validateValue(req, schema, vPath, val, 'body', function (err) {
+        var convertedVal = mHelpers.convertValue(val, schema, mHelpers.getParameterType(schema), 'body');
+        validateValue(req, schema, vPath, convertedVal, val, 'body', function (err) {
           if (err) {
             throw err;
           }
@@ -361,12 +369,14 @@ exports = module.exports = function (options) {
                     var schema = swaggerVersion === '1.2' ? parameter : parameter.schema;
                     var pLocation = swaggerVersion === '1.2' ? schema.paramType : schema.in;
                     var val;
+                    var originalVal;
 
                     paramName = schema.name;
                     paramPath = swaggerVersion === '1.2' ?
                       req.swagger.operationPath.concat(['params', paramIndex.toString()]) :
                       parameter.path;
                     val = req.swagger.params[paramName].value;
+                    originalVal = req.swagger.params[paramName].originalValue;
 
                     // Validate requiredness
                     validators.validateRequiredness(val, schema.required);
@@ -376,7 +386,7 @@ exports = module.exports = function (options) {
                       return oCallback();
                     }
 
-                    validateValue(req, schema, paramPath, val, pLocation, oCallback);
+                    validateValue(req, schema, paramPath, val, originalVal, pLocation, oCallback);
 
                     paramIndex++;
                   }, function (err) {
