@@ -1,6 +1,12 @@
 ## Release Notes
 # Changes
 
+## 0.11.3
+* patch: Fixed issue where parameters of type "string", format "date" or format "date-time", and had a "pattern" JSON schema property, then HTTP requests to the API endpoint would fail with HTTP 400 error "val.match" is not a function.
+
+## 0.11.2
+* patch: bump json-refs
+
 ## 0.11.1
 * Fix "UNRESOLVABLE definition error" when definitions contain URI encoded charactes
 

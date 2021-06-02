@@ -114,7 +114,8 @@ var validateValue = function (req, schema, path, val, originalVal, location, cal
   var isModel = mHelpers.isModelParameter(version, schema);
   var spec = cHelpers.getSpec(version);
 
-  if (schema.type === 'string' && schema.format === 'date') {
+  if (schema.type === 'string'
+    && (schema.format === 'date' || schema.format === 'date-time')) {
     // When the format is 'date', the value is automatically converted to a
     // `Date` object. If the JSON schema has a pattern, it will fail validation.
     // In this case, schema validation needs to run against the original value.
