@@ -1,6 +1,9 @@
 ## Release Notes
 # Changes
 
+## 0.11.5
+* patch: Fixed issue where a client request for a parameterized path that matched the express parameterized path exactly, would result in `TypeError: Cannot read property '1' of undefined`. E.g. if the path is `/api/:typeId`, and the client requests "/api/:typeId".
+
 ## 0.11.4
 * patch: "async" package is production dependency so it is moved to "dependencies" section of package.json file.
 

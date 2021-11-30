@@ -180,7 +180,7 @@ var processOperationParameters = function (swaggerMetadata, pathKeys, pathMatch,
 
     return fields;
   }, []);
-  
+
   var contentType = req.headers['content-type'];
   if (multiPartFields.length) {
     // If there are files, use multer#fields
@@ -290,7 +290,6 @@ var processSwaggerDocuments = function (rlOrSO, apiDeclarations) {
 
     return cacheEntry;
   };
-
   debug('  Identified Swagger version: %s', spec.version);
 
   if (spec.version === '1.2') {
@@ -386,10 +385,22 @@ exports = module.exports = function (rlOrSO, apiDeclarations) {
     var match;
     var metadata;
 
-    cacheEntry = apiCache[path] || _.find(apiCache, function (metadata) {
-      match = metadata.re.exec(path);
-      return _.isArray(match);
-    });
+    cacheEntry = apiCache[path];
+    if (cacheEntry && cacheEntry.keys.length) {
+      // the client `path` matched something in the spec paths, but it does not
+      // necessarily mean it is correct. if the match has path parameters, it
+      // must search all cache entries and extract the parameters. e.g. if the
+      // the spec has path `/banana/:id`, and the client sends, "/banana/:id",
+      // the path values need to be matched using regex. unset the `cacheEntry`
+      // and force a full lookup.
+      cacheEntry = null;
+    }
+    if (!cacheEntry) {
+      cacheEntry = _.find(apiCache, function (metadata) {
+        match = metadata.re.exec(path);
+        return _.isArray(match);
+      });
+    }
 
     debug('%s %s', req.method, req.url);
     debug('  Is a Swagger path: %s', !_.isUndefined(cacheEntry));
