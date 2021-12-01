@@ -1668,5 +1668,27 @@ describe('Swagger Validator Middleware v2.0', function () {
           }, done));
       });
     });
+
+    it('should not fail when client path exactly matches express path', function (done) {
+      var cPetStore = _.cloneDeep(petStoreJson);
+      cPetStore.paths['/pets/{id}'].get.parameters = [];
+      cPetStore.paths['/pets/{id}'].parameters[0].type = 'string';
+      delete cPetStore.paths['/pets/{id}'].parameters[0].format;
+
+      helpers.createServer([cPetStore], {
+        swaggerRouterOptions: {
+          controllers: {
+            getPetById: function (req, res) {
+              res.end('OK');
+            }
+          }
+        }
+      }, function (app) {
+        request(app)
+          .get('/api/pets/:id')
+          .expect(200)
+          .end(helpers.expectContent('OK', done));
+      });
+    });
   });
 });

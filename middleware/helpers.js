@@ -294,7 +294,7 @@ var convertValue = module.exports.convertValue = function (value, schema, type, 
       var isDateTime = schema.format === 'date-time' && validators.isValidDateTime(value);
       if (isDate || isDateTime) {
         value = new Date(value);
-    
+
         if (!_.isDate(value) || value.toString() === 'Invalid Date') {
           value = original;
         }
